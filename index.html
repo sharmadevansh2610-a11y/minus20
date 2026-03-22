@@ -166,6 +166,7 @@ background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0
 background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
 }
 select option { background:#1a1a2e; color:#fff; }
+select optgroup { background:#1a1a2e; color:rgba(255,255,255,0.4); font-size:11px; }
 .input-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .input-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
 
@@ -250,10 +251,8 @@ padding:16px 18px;
 transform:translateY(-200%);
 transition:transform 0.5s cubic-bezier(0.16,1,0.3,1);
 pointer-events:all;
-position:relative;
-overflow:hidden;
-word-break:break-word;
-max-width:100%;
+position:relative; overflow:hidden;
+word-break:break-word; max-width:100%;
 }
 #toast::before {
 content:''; position:absolute; top:0; left:0; right:0; height:1px;
@@ -533,18 +532,38 @@ font-family:'Syne',sans-serif; font-size:15px; font-weight:700; color:var(--acce
 <div class="input-group">
 <select id="quick-food">
 <option value="">Choose a food…</option>
+<optgroup label="── Your Foods ──">
+<option value="Whey Protein (1 scoop)|120|24|3|1">🥛 Whey Protein (1 scoop)</option>
+<option value="Honey (10g)|32|0|8|0">🍯 Honey (10g)</option>
+<option value="Soybeans (100g raw)|345|52|33|0.5">🫘 Soybeans (100g)</option>
+<option value="Soybeans (150g raw)|517|78|50|0.75">🫘 Soybeans (150g)</option>
+<option value="Low Fat Paneer (100g)|204|25|6|9">🧀 Low Fat Paneer (100g)</option>
+<option value="Low Fat Paneer (150g)|306|37.5|9|13.5">🧀 Low Fat Paneer (150g)</option>
+<option value="Milk (200ml)|120|6.5|10|6">🥛 Milk (200ml)</option>
+<option value="Curd / Dahi (100g)|68|6.3|10|3">🫙 Curd / Dahi (100g)</option>
+<option value="Roti (1 medium)|100|3|20|1">🫓 Roti (1 medium)</option>
+<option value="Roti (2 medium)|200|6|40|2">🫓 Roti (2 medium)</option>
+<option value="Oats (50g)|190|6|32|4">🌾 Oats (50g)</option>
+<option value="Peanut Butter (16g)|71|5.7|7.7|1.9">🥜 Peanut Butter (16g)</option>
+<option value="Peanut Butter (32g)|142|11.4|15.4|3.8">🥜 Peanut Butter (32g)</option>
+<option value="Almonds (5 pcs)|35|1|1|3">🥜 Almonds (5 pcs)</option>
+<option value="Oil (5g)|45|0|0|5">🫙 Oil (5g)</option>
+<option value="Oil (10g)|90|0|0|10">🫙 Oil (10g)</option>
+<option value="Besan (40g)|155|9|26|2">🌾 Besan (40g)</option>
+<option value="Mayonnaise (14g)|70|0|1|7">🫙 Mayonnaise (14g)</option>
+<option value="Electral (1 packet)|70|0|18|0">⚡ Electral (1 packet)</option>
+</optgroup>
+<optgroup label="── General Foods ──">
 <option value="Chicken Breast (100g)|165|31|0|3.6">🍗 Chicken Breast (100g)</option>
-<option value="Whey Protein (1 scoop)|120|25|3|2">🥛 Whey Protein (1 scoop)</option>
 <option value="Whole Eggs (2 large)|155|13|1.1|11">🥚 Whole Eggs (2 large)</option>
 <option value="White Rice (100g cooked)|130|2.7|28|0.3">🍚 White Rice (100g)</option>
 <option value="Greek Yogurt (150g)|90|15|6|0">🫙 Greek Yogurt (150g)</option>
-<option value="Oats (50g dry)|190|7|32|4">🌾 Oats (50g dry)</option>
 <option value="Banana (1 medium)|90|1.1|23|0.3">🍌 Banana (medium)</option>
-<option value="Almonds (30g)|174|6|6|15">🥜 Almonds (30g)</option>
 <option value="Salmon (100g)|208|20|0|13">🐟 Salmon (100g)</option>
 <option value="Sweet Potato (100g)|86|1.6|20|0.1">🍠 Sweet Potato (100g)</option>
 <option value="Cottage Cheese (100g)|98|11|3.4|4.3">🧀 Cottage Cheese (100g)</option>
 <option value="Tuna (1 can 85g)|109|25|0|1">🥫 Tuna Can (85g)</option>
+</optgroup>
 </select>
 </div>
 <button class="btn btn-primary" onclick="quickAddFood()">+ Add Food</button>
@@ -970,15 +989,10 @@ function getToday(data) {
 const k = todayKey();
 if (!data.days[k]) {
 data.days[k] = {
-weight:null,
-foods:[],
-lifts:[],
-cardios:[],
-walks:[],
+weight:null, foods:[], lifts:[], cardios:[], walks:[],
 supps:{ creatine:false, fishoil:false, multi:false, magnesium:false }
 };
 }
-// Ensure magnesium exists for older saved data
 if (!data.days[k].supps) data.days[k].supps = {};
 if (data.days[k].supps.magnesium === undefined) data.days[k].supps.magnesium = false;
 return data.days[k];
@@ -1021,16 +1035,13 @@ document.getElementById('dash-prot').textContent = Math.round(totalProt);
 document.getElementById('dash-cal-target').textContent = prefs.calTarget;
 document.getElementById('dash-prot-target').textContent = prefs.protTarget;
 
-const calPct = Math.min(100,(totalCals/prefs.calTarget)*100);
-const protPct = Math.min(100,(totalProt/prefs.protTarget)*100);
-document.getElementById('cal-bar').style.width = calPct+'%';
-document.getElementById('prot-bar').style.width = protPct+'%';
+document.getElementById('cal-bar').style.width = Math.min(100,(totalCals/prefs.calTarget)*100)+'%';
+document.getElementById('prot-bar').style.width = Math.min(100,(totalProt/prefs.protTarget)*100)+'%';
 
 const activeBurn = calcTotalActiveBurn(today);
 const totalBurn = activeBurn + prefs.bmr;
-const deficit = totalBurn - totalCals;
 document.getElementById('dash-burn').textContent = Math.round(totalBurn);
-document.getElementById('dash-deficit').textContent = Math.round(deficit);
+document.getElementById('dash-deficit').textContent = Math.round(totalBurn - totalCals);
 
 document.getElementById('tog-creatine').checked = today.supps.creatine || false;
 document.getElementById('tog-fishoil').checked = today.supps.fishoil || false;
@@ -1071,7 +1082,7 @@ if (!sel.value) return;
 const [name,cals,prot,carbs,fat] = sel.value.split('|');
 const data = loadData();
 const today = getToday(data);
-today.foods.push({name,cals:+cals,prot:+prot,carbs:+carbs,fat:+fat});
+today.foods.push({name, cals:+cals, prot:+prot, carbs:+carbs, fat:+fat});
 saveData(data);
 sel.selectedIndex = 0;
 renderFood();
@@ -1086,7 +1097,7 @@ const carbs = parseFloat(document.getElementById('food-carbs').value)||0;
 if (!name||!cals) return;
 const data = loadData();
 const today = getToday(data);
-today.foods.push({name,cals,prot,carbs,fat:0});
+today.foods.push({name, cals, prot, carbs, fat:0});
 saveData(data);
 ['food-name','food-cals','food-prot','food-carbs'].forEach(id=>document.getElementById(id).value='');
 renderFood();
@@ -1208,10 +1219,8 @@ const r = parseFloat(document.getElementById('lift-reps').value)||0;
 const s = parseFloat(document.getElementById('lift-sets').value)||0;
 const preview = document.getElementById('lift-preview');
 if (!w||!r||!s) { preview.style.display='none'; return; }
-const vol = w*r*s;
-const kcal = calcLiftKcal(w,r,s);
-document.getElementById('preview-vol').textContent = vol.toFixed(0)+' kg';
-document.getElementById('preview-kcal').textContent = kcal.toFixed(0)+' kcal';
+document.getElementById('preview-vol').textContent = (w*r*s).toFixed(0)+' kg';
+document.getElementById('preview-kcal').textContent = calcLiftKcal(w,r,s).toFixed(0)+' kcal';
 preview.style.display = 'block';
 }
 
@@ -1219,10 +1228,9 @@ function calcLiftKcal(weight, reps, sets) {
 const data = loadData();
 const bw = data.prefs.bodyweight||100;
 if (selectedExercise) {
-const setDurMin = (reps*3+90)/60;
-return (bw/10)*selectedExercise.met*setDurMin*sets;
+return (bw/10) * selectedExercise.met * ((reps*3+90)/60) * sets;
 }
-return (bw/70)*6*sets*((reps*3+90)/60);
+return (bw/70) * 6 * sets * ((reps*3+90)/60);
 }
 
 function logLift() {
@@ -1231,11 +1239,9 @@ const w = parseFloat(document.getElementById('lift-weight').value)||0;
 const r = parseFloat(document.getElementById('lift-reps').value)||0;
 const s = parseFloat(document.getElementById('lift-sets').value)||0;
 if (!exercise||!w||!r||!s) return;
-const vol = w*r*s;
-const kcal = calcLiftKcal(w,r,s);
 const data = loadData();
 const today = getToday(data);
-today.lifts.push({exercise, weight:w, reps:r, sets:s, vol, kcal:Math.round(kcal)});
+today.lifts.push({exercise, weight:w, reps:r, sets:s, vol:w*r*s, kcal:Math.round(calcLiftKcal(w,r,s))});
 saveData(data);
 document.getElementById('lift-weight').value='';
 document.getElementById('lift-reps').value='';
@@ -1268,8 +1274,7 @@ const steps = parseFloat(document.getElementById('walk-steps').value)||0;
 if (!steps) return;
 const data = loadData();
 const bw = data.prefs.bodyweight||100;
-const km = steps/2000;
-const kcal = Math.round(km*75*(bw/85));
+const kcal = Math.round((steps/2000)*75*(bw/85));
 const today = getToday(data);
 today.walks.push({steps, kcal});
 saveData(data);
@@ -1281,14 +1286,12 @@ renderDash();
 function renderMove() {
 const data = loadData();
 const today = getToday(data);
-const totalBurn = calcTotalActiveBurn(today);
-document.getElementById('move-total-badge').textContent = Math.round(totalBurn)+' kcal';
+document.getElementById('move-total-badge').textContent = Math.round(calcTotalActiveBurn(today))+' kcal';
 
 const liftCard = document.getElementById('lift-log-card');
-const liftList = document.getElementById('lift-log-list');
 if (today.lifts && today.lifts.length) {
 liftCard.style.display = 'block';
-liftList.innerHTML = today.lifts.map(l=>`
+document.getElementById('lift-log-list').innerHTML = today.lifts.map(l=>`
 <div class="workout-session-card">
 <div class="session-exercise">${l.exercise}</div>
 <div class="session-meta">${l.weight}kg × ${l.reps} reps × ${l.sets} sets · Vol: ${l.vol}kg</div>
@@ -1298,10 +1301,9 @@ liftList.innerHTML = today.lifts.map(l=>`
 } else { liftCard.style.display='none'; }
 
 const cardioCard = document.getElementById('cardio-log-card');
-const cardioList = document.getElementById('cardio-log-list');
 if (today.cardios && today.cardios.length) {
 cardioCard.style.display = 'block';
-cardioList.innerHTML = today.cardios.map(c=>`
+document.getElementById('cardio-log-list').innerHTML = today.cardios.map(c=>`
 <div class="workout-session-card">
 <div class="session-exercise">${c.activity}</div>
 <div class="session-meta">${c.duration} min · ${c.intensity} intensity</div>
@@ -1311,10 +1313,9 @@ cardioList.innerHTML = today.cardios.map(c=>`
 } else { cardioCard.style.display='none'; }
 
 const walkCard = document.getElementById('walk-log-card');
-const walkList = document.getElementById('walk-log-list');
 if (today.walks && today.walks.length) {
 walkCard.style.display = 'block';
-walkList.innerHTML = today.walks.map(w=>`
+document.getElementById('walk-log-list').innerHTML = today.walks.map(w=>`
 <div class="workout-session-card">
 <div class="session-exercise">🚶 Walking</div>
 <div class="session-meta">${w.steps.toLocaleString()} steps · ~${(w.steps/2000).toFixed(1)} km</div>
@@ -1334,34 +1335,27 @@ const keys = Object.keys(days).sort().slice(-7);
 
 const labels = keys.map(k=>{ const [,m,d]=k.split('-'); return `${d}/${m}`; });
 const weightArr = keys.map(k=>days[k].weight||null);
-const burnArr = keys.map(k=>{
-const active = calcTotalActiveBurn(days[k]);
-return Math.round(active+prefs.bmr);
-});
+const burnArr = keys.map(k=>Math.round(calcTotalActiveBurn(days[k])+prefs.bmr));
 const stepsArr = keys.map(k=>(days[k].walks ||[]).reduce((s,w)=>s+w.steps,0));
 const volArr = keys.map(k=>(days[k].lifts ||[]).reduce((s,l)=>s+l.vol, 0));
 const calsArr = keys.map(k=>(days[k].foods ||[]).reduce((s,f)=>s+f.cals, 0));
 
-const deficits = keys.map((_,i)=>burnArr[i]-calsArr[i]);
-const validDeficits = deficits.filter(d=>d>0);
+const validDeficits = keys.map((_,i)=>burnArr[i]-calsArr[i]).filter(d=>d>0);
 const avgDeficit = validDeficits.length ? validDeficits.reduce((a,b)=>a+b,0)/validDeficits.length : 0;
 const projLoss = (avgDeficit*14)/7700;
-const oracleW = ((prefs.bodyweight||100) - projLoss).toFixed(1);
+const oracleW = ((prefs.bodyweight||100)-projLoss).toFixed(1);
 
 document.getElementById('oracle-val').textContent = oracleW;
 document.getElementById('oracle-sub').textContent = `Avg deficit: ${Math.round(avgDeficit)} kcal/day → −${projLoss.toFixed(2)}kg`;
 document.getElementById('ins-avg-deficit').textContent = Math.round(avgDeficit);
 document.getElementById('ins-proj-loss').textContent = projLoss.toFixed(2)+'kg';
 
-const chartDefaults = {
-responsive:true,
-maintainAspectRatio:true,
+const base = {
+responsive:true, maintainAspectRatio:true,
 plugins:{ legend:{display:false}, tooltip:{
 backgroundColor:'rgba(10,10,20,0.95)',
-titleColor:'rgba(242,242,247,0.9)',
-bodyColor:'rgba(242,242,247,0.6)',
-borderColor:'rgba(255,255,255,0.08)',
-borderWidth:1, cornerRadius:12, padding:10
+titleColor:'rgba(242,242,247,0.9)', bodyColor:'rgba(242,242,247,0.6)',
+borderColor:'rgba(255,255,255,0.08)', borderWidth:1, cornerRadius:12, padding:10
 }},
 scales:{
 x:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(242,242,247,0.3)',font:{size:10,family:"'DM Sans'"}} },
@@ -1369,41 +1363,31 @@ y:{ grid:{color:'rgba(255,255,255,0.04)'}, ticks:{color:'rgba(242,242,247,0.3)',
 }
 };
 
-function makeChart(id, type, labels, data, color) {
+function mkChart(id, type, lbls, vals, color) {
 if (charts[id]) charts[id].destroy();
 const ctx = document.getElementById(id).getContext('2d');
 const grad = ctx.createLinearGradient(0,0,0,180);
-grad.addColorStop(0, color+'33');
-grad.addColorStop(1, color+'00');
+grad.addColorStop(0, color+'33'); grad.addColorStop(1, color+'00');
 charts[id] = new Chart(ctx, {
-type,
-data:{
-labels,
-datasets:[{
-data,
-borderColor:color,
-backgroundColor:type==='line' ? grad : color+'55',
+type, data:{ labels:lbls, datasets:[{
+data:vals, borderColor:color,
+backgroundColor:type==='line'?grad:color+'55',
 borderWidth:type==='line'?2:0,
-pointBackgroundColor:color,
-pointRadius:type==='line'?3:0,
-pointHoverRadius:5,
-fill:true, tension:0.4,
-borderRadius:type==='bar'?6:0,
-}]
-},
-options:{ ...chartDefaults, spanGaps:true }
+pointBackgroundColor:color, pointRadius:type==='line'?3:0, pointHoverRadius:5,
+fill:true, tension:0.4, borderRadius:type==='bar'?6:0,
+}]},
+options:{...base, spanGaps:true}
 });
 }
 
-makeChart('chart-weight','line',labels,weightArr,'#3B82F6');
-makeChart('chart-burn', 'bar', labels,burnArr, '#EF4444');
-makeChart('chart-steps', 'bar', labels,stepsArr, '#22C55E');
-makeChart('chart-volume','bar', labels,volArr, '#A855F7');
+mkChart('chart-weight','line',labels,weightArr,'#3B82F6');
+mkChart('chart-burn', 'bar', labels,burnArr, '#EF4444');
+mkChart('chart-steps', 'bar', labels,stepsArr, '#22C55E');
+mkChart('chart-volume','bar', labels,volArr, '#A855F7');
 }
 
 function loadSettings() {
-const data = loadData();
-const p = data.prefs;
+const p = loadData().prefs;
 document.getElementById('set-weight').value = p.bodyweight||100;
 document.getElementById('set-caltarget').value = p.calTarget ||1500;
 document.getElementById('set-prottarget').value = p.protTarget||135;
